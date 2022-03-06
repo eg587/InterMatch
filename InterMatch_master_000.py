@@ -20,6 +20,12 @@ from pymatgen.core.periodic_table import Element
 
 mpr = MPRester('v2anpbHsAOr4tmXQ')
 
+#example query of target materials, creates a list from which to calculate interface properties:
+target_elements = ['Ti','V','Zr','Nb','Mo','Pd','Hf','Ta','W','Re','Pt','Se','Te','S']
+materials_of_interest = mpr.query(criteria = {'elements':{'$in':target_elements,'$all':['S']},'nelements':2,'efermi':{"$exists":True,"$ne":None}},
+                 properties=['material_id','pretty_formula'])
+mpids_list = [x['material_id'] for x in materials_of_interest if x['material_id'] is not None]
+
 def calculate_energy_above_hull(mpid):
     '''
     returns energy above hull of system specified by param mpid
@@ -263,11 +269,12 @@ tolerance = 1e-6
 atoms_min = 1
 atoms_max = 400
 
-def compute_best_supercell(mpid_1,mpid_2,nmax,mmax,theta,strain_min,strain_max,tolerance,atoms_min,atoms_max):
+def compute_best_supercell(mpid_1,mpid_2,charge_transfer,nmax,mmax,theta,strain_min,strain_max,tolerance,atoms_min,atoms_max):
     '''
 
     :param mpid_1:
     :param mpid_2:
+    :param charge_transfer: result from charge transfer calculation
     :param nmax: maximum integer multiple of first lattice vector of mpid_2 used in supercell search
     :param mmax: maximum integer multiple of second lattice vector of mpid_2 used in supercell search
     :param theta: twist angle between systems specified by mpid_1 and mpid_2
@@ -367,6 +374,7 @@ def compute_best_supercell(mpid_1,mpid_2,nmax,mmax,theta,strain_min,strain_max,t
             # new_t['is_public']= True,
             new_t['identifier'] = mpid_1
             new_t['data'] = {'interface': mpid_2,
+                             '\u0394n': charge_transfer,
                              '\u03B5': {'\u03B5\u2081\u2081': strain[0], '\u03B5\u2082\u2082': strain[1],
                                         'deformation': strain[2]},
                              'atoms': total_atoms,
@@ -380,13 +388,14 @@ def compute_best_supercell(mpid_1,mpid_2,nmax,mmax,theta,strain_min,strain_max,t
                                          'i\u2082\u2081': bcells[x][1][2][0], 'j\u2082\u2081': bcells[x][1][2][1]},
                              'v\u2082': {'i\u2081\u2082': bcells[x][0][3][0], 'j\u2081\u2082': bcells[x][0][3][1],
                                          'i\u2082\u2082': bcells[x][1][3][0], 'j\u2082\u2082': bcells[x][1][3][1]}
+                             
                              }
             supercells.append(new_t)
             strains.append(strain[2])
             atoms.append(total_atoms)
     for i in range(len(supercells)):
-        #if supercells[i]["data"]["\u03B5"]['deformation'] == min(strains):
-        if supercells[i]["data"]["\u03B5"]['deformation']==min(strains) or supercells[i]["data"]["atoms"]==min(atoms):
+        if supercells[i]["data"]["\u03B5"]['deformation'] == min(strains):
+        #if supercells[i]["data"]["\u03B5"]['deformation']==min(strains) or supercells[i]["data"]["atoms"]==min(atoms):
             best_cell = supercells[i]
             print(best_cell)
 
@@ -398,6 +407,37 @@ def compute_best_supercell(mpid_1,mpid_2,nmax,mmax,theta,strain_min,strain_max,t
         else:
             pass
 
+
+#to sweep over multiple twist angles:
+charge_transfer = calculate_charge_transfer("mp-1984","mp-1027692")
 for theta in tqdm(range(thetamin,thetamax+1,dtheta)):
     print(theta)
-    compute_best_supercell("mp-1984", "mp-1027692", nmax, mmax, theta, strain_min, strain_max, tolerance, atoms_min, atoms_max)
+    compute_best_supercell("mp-1984", "mp-1027692", nmax, mmax, charge_transfer, theta, strain_min, strain_max, tolerance, atoms_min, atoms_max)
+
+# entries = []
+#pairs = combinations(mpids_list, 2)
+# for i in tqdm(itertools.islice(list(pairs)),0,10000,1)):
+#     try:
+#         mpid1, mpid2 = i
+#         charge_transfer = calculate_charge_transfer(mpid1, mpid2)
+#         cell = compute_supercell(mpid1, mpid2, charge_transfer, 10, 10, 0, -0.10, 0.10, 1e-6, 1, 500)
+#         elastic_strain = compute_elastic_strain_supercell(mpid1, mpid2)
+#         cell['data']['\u03B5ᴱᴸ']['\u03B5ᶜ₁'] = elastic_strain[0]
+#         cell['data']['\u03B5ᴱᴸ']['\u03B5ᵗ₁'] = elastic_strain[1]
+#         cell['data']['\u03B5ᴱᴸ']['\u03B5ᶜ₂'] = elastic_strain[2]
+#         cell['data']['\u03B5ᴱᴸ']['\u03B5ᵗ₂'] = elastic_strain[3]
+#         cell['data']['\u03B5ᴱᴸ']['aᴱᶠᶠ'] = elastic_strain[4]
+#         cell['data']['\u03B5ᴱᴸ']['bᴱᶠᶠ'] = elastic_strain[5]
+#         #if None not in (charge_transfer, cell):
+#         if cell is not None:
+#             entries.append(cell)
+#             with open(os.path.join('/Users/eligerber/Downloads/IntDB-eg-edits-0/tmd_jsons','interface_' + str(cell['identifier'] + cell['data']['interface']) + '.json'), 'w') as fp:
+#                 json.dump(cell, fp)
+#
+#     except:
+#         entrieslist = open(os.path.join('/Users/eligerber/Downloads/IntDB-eg-edits-0/tmd_jsons', 'entries_err_list' + str(i) + '.txt'), 'w')
+#         for element in entries:
+#             entrieslist.write(str(element) + ",\n")
+#         entrieslist.close()
+#     else:
+#         pass
