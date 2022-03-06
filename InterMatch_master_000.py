@@ -264,6 +264,20 @@ atoms_min = 1
 atoms_max = 400
 
 def compute_best_supercell(mpid_1,mpid_2,nmax,mmax,theta,strain_min,strain_max,tolerance,atoms_min,atoms_max):
+    '''
+
+    :param mpid_1:
+    :param mpid_2:
+    :param nmax: maximum integer multiple of first lattice vector of mpid_2 used in supercell search
+    :param mmax: maximum integer multiple of second lattice vector of mpid_2 used in supercell search
+    :param theta: twist angle between systems specified by mpid_1 and mpid_2
+    :param strain_min: minimum strain allowed in supercell
+    :param strain_max: maximum strain allowed in supercell
+    :param tolerance: margin of error for cells to be considered commensurate
+    :param atoms_min: minimum number of total atoms allowed in supercell
+    :param atoms_max: maximum number of total atoms allowed in supercell
+    :return: 'interface' dict object ready to upload to MPContribs
+    '''
     mpids = [mpid_1, mpid_2]
 
     structures = [mpr.get_structure_by_material_id(mpid) for mpid in mpids]
@@ -383,7 +397,7 @@ def compute_best_supercell(mpid_1,mpid_2,nmax,mmax,theta,strain_min,strain_max,t
             return best_cell
         else:
             pass
-        
+
 for theta in tqdm(range(thetamin,thetamax+1,dtheta)):
     print(theta)
     compute_best_supercell("mp-1984", "mp-1027692", nmax, mmax, theta, strain_min, strain_max, tolerance, atoms_min, atoms_max)
