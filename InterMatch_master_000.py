@@ -20,12 +20,6 @@ from pymatgen.core.periodic_table import Element
 
 mpr = MPRester('v2anpbHsAOr4tmXQ')
 
-#example query of target materials, creates a list from which to calculate interface properties:
-target_elements = ['Ti','V','Zr','Nb','Mo','Pd','Hf','Ta','W','Re','Pt','Se','Te','S']
-materials_of_interest = mpr.query(criteria = {'elements':{'$in':target_elements,'$all':['S']},'nelements':2,'efermi':{"$exists":True,"$ne":None}},
-                 properties=['material_id','pretty_formula'])
-mpids_list = [x['material_id'] for x in materials_of_interest if x['material_id'] is not None]
-
 def calculate_energy_above_hull(mpid):
     '''
     returns energy above hull of system specified by param mpid
@@ -388,7 +382,7 @@ def compute_best_supercell(mpid_1,mpid_2,charge_transfer,nmax,mmax,theta,strain_
                                          'i\u2082\u2081': bcells[x][1][2][0], 'j\u2082\u2081': bcells[x][1][2][1]},
                              'v\u2082': {'i\u2081\u2082': bcells[x][0][3][0], 'j\u2081\u2082': bcells[x][0][3][1],
                                          'i\u2082\u2082': bcells[x][1][3][0], 'j\u2082\u2082': bcells[x][1][3][1]}
-                             
+
                              }
             supercells.append(new_t)
             strains.append(strain[2])
@@ -408,14 +402,26 @@ def compute_best_supercell(mpid_1,mpid_2,charge_transfer,nmax,mmax,theta,strain_
             pass
 
 
-#to sweep over multiple twist angles:
+#example query of target materials, creates a list from which to calculate interface properties:
+target_elements = ['Ti','V','Zr','Nb','Mo','Pd','Hf','Ta','W','Re','Pt','Se','Te','S']
+materials_of_interest = mpr.query(criteria = {'elements':{'$in':target_elements,'$all':['S']},'nelements':2,'efermi':{"$exists":True,"$ne":None}},
+                 properties=['material_id','pretty_formula'])
+mpids_list = [x['material_id'] for x in materials_of_interest if x['material_id'] is not None]
+stable_mpids_list = []
+for id in mpids_list:
+    E_above_hull = calculate_energy_above_hull(id)
+    if E_above_hull > 0.1:
+        stable_mpids_list.append(id)
+
+#sweep over multiple twist angles:
 charge_transfer = calculate_charge_transfer("mp-1984","mp-1027692")
 for theta in tqdm(range(thetamin,thetamax+1,dtheta)):
     print(theta)
     compute_best_supercell("mp-1984", "mp-1027692", nmax, mmax, charge_transfer, theta, strain_min, strain_max, tolerance, atoms_min, atoms_max)
 
+#compute pairs from a queried list:
 # entries = []
-#pairs = combinations(mpids_list, 2)
+#pairs = combinations(stable_mpids_list, 2)
 # for i in tqdm(itertools.islice(list(pairs)),0,10000,1)):
 #     try:
 #         mpid1, mpid2 = i
@@ -440,4 +446,4 @@ for theta in tqdm(range(thetamin,thetamax+1,dtheta)):
 #             entrieslist.write(str(element) + ",\n")
 #         entrieslist.close()
 #     else:
-#         pass
+#         p
