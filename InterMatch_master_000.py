@@ -255,6 +255,8 @@ def calculate_elastic_strain_supercell(mpid1, mpid2, V1_v, V2_v, V1_u, V2_u):
 dtheta=1
 thetamin=0
 thetamax=60
+nmax = 10
+mmax = 10
 strain_min = -0.1
 strain_max = 0.1
 tolerance = 1e-6
@@ -319,7 +321,6 @@ def compute_best_supercell(mpid_1,mpid_2,nmax,mmax,theta,strain_min,strain_max,t
     for i in range(-nmax, nmax + 1):
         for j in range(0, mmax + 1):
             v = i * b1_rotated + j * b2_rotated
-            # print(v,[i,j])
             s = linalg.inv(U).dot(v)
             s_int = np.around(s)
             u = U.dot(s_int)
@@ -333,13 +334,13 @@ def compute_best_supercell(mpid_1,mpid_2,nmax,mmax,theta,strain_min,strain_max,t
         V1_u = bcells[x][0][1]
         V2_u = bcells[x][1][1]
         strain = calculate_strain(V1_v, V2_v, V1_u, V2_u)
+        # strain = compute_stress_tensor(bcells[x][0][0], bcells[x][1][0], bcells[x][0][1], bcells[x][1][1])
         area_ratio_v = round(abs((V1_v[0] * V2_v[1] - V1_v[1] * V2_v[0]) / (br1x * br2y - br1y * br2x)))
         area_ratio_u = round(abs((V1_u[0] * V2_u[1] - V1_u[1] * V2_u[0]) / (a1x * a2y - a1y * a2x)))
         atoms_u = round(atoms1 * area_ratio_u)
         atoms_v = round(atoms2 * area_ratio_v)
         # total_atoms = round(atoms1 * area_ratio_u + atoms2 * area_ratio_v)
         total_atoms = round(atoms_u + atoms_v)
-        # strain = compute_stress_tensor(bcells[x][0][0], bcells[x][1][0], bcells[x][0][1], bcells[x][1][1])
         if abs(strain[0]) < strain_max and abs(strain[1]) < strain_max and abs(
                 strain[2]) < strain_max and atoms_max > total_atoms > atoms_min and round(bcells[x][0][0][0]) == round(
                 bcells[x][0][1][0]) and round(bcells[x][0][0][1]) == round(bcells[x][0][1][1]) and round(
@@ -370,8 +371,8 @@ def compute_best_supercell(mpid_1,mpid_2,nmax,mmax,theta,strain_min,strain_max,t
             strains.append(strain[2])
             atoms.append(total_atoms)
     for i in range(len(supercells)):
-        if supercells[i]["data"]["\u03B5"]['deformation'] == min(strains):
-        #if supercells[i]["data"]["\u03B5"]['deformation']==min(strains) or supercells[i]["data"]["atoms"]==min(atoms):
+        #if supercells[i]["data"]["\u03B5"]['deformation'] == min(strains):
+        if supercells[i]["data"]["\u03B5"]['deformation']==min(strains) or supercells[i]["data"]["atoms"]==min(atoms):
             best_cell = supercells[i]
             print(best_cell)
 
@@ -382,3 +383,7 @@ def compute_best_supercell(mpid_1,mpid_2,nmax,mmax,theta,strain_min,strain_max,t
             return best_cell
         else:
             pass
+        
+for theta in tqdm(range(thetamin,thetamax+1,dtheta)):
+    print(theta)
+    compute_best_supercell("mp-1984", "mp-1027692", nmax, mmax, theta, strain_min, strain_max, tolerance, atoms_min, atoms_max)
