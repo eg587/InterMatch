@@ -18,7 +18,7 @@ from scipy.integrate import trapz
 from scipy.interpolate import interp1d
 from pymatgen.core.periodic_table import Element
 
-mpr = MPRester("v2anpbHsAOr4tmXQ")
+mpr = MPRester("your API key goes here")
 
 
 def calculate_energy_above_hull(mpid):
