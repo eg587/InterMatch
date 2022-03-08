@@ -546,11 +546,11 @@ for theta in tqdm(range(thetamin, thetamax + 1, dtheta)):
 #         #if None not in (charge_transfer, cell):
 #         if cell is not None:
 #             entries.append(cell)
-#             with open(os.path.join('/Users/eligerber/Downloads/IntDB-eg-edits-0/tmd_jsons','interface_' + str(cell['identifier'] + cell['data']['interface']) + '.json'), 'w') as fp:
+#             with open('interface_' + str(cell['identifier'] + cell['data']['interface']) + '.json'), 'w') as fp:
 #                 json.dump(cell, fp)
 #
 #     except:
-#         entrieslist = open(os.path.join('/Users/eligerber/Downloads/IntDB-eg-edits-0/tmd_jsons', 'entries_err_list' + str(i) + '.txt'), 'w')
+#         entrieslist = open('entries_err_list' + str(i) + '.txt'), 'w')
 #         for element in entries:
 #             entrieslist.write(str(element) + ",\n")
 #         entrieslist.close()
