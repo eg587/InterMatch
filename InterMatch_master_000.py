@@ -536,7 +536,7 @@ for theta in tqdm(range(thetamin, thetamax + 1, dtheta)):
 #         mpid1, mpid2 = i
 #         charge_transfer = calculate_charge_transfer(mpid1, mpid2)
 #         cell = compute_supercell(mpid1, mpid2, charge_transfer, 10, 10, 0, -0.10, 0.10, 1e-6, 1, 500)
-#         elastic_strain = compute_elastic_strain_supercell(mpid1, mpid2)
+#         elastic_strain = compute_elastic_strain_supercell(mpid1, mpid2, cell["data"]['v1'], cell["data"]['v2'], cell["data"]['u1'], cell["data"]['u2'])
 #         cell['data']['\u03B5ᴱᴸ']['\u03B5ᶜ₁'] = elastic_strain[0]
 #         cell['data']['\u03B5ᴱᴸ']['\u03B5ᵗ₁'] = elastic_strain[1]
 #         cell['data']['\u03B5ᴱᴸ']['\u03B5ᶜ₂'] = elastic_strain[2]
