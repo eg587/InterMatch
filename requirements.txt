@@ -1,0 +1,23 @@
+import json
+import os
+from tqdm import tqdm
+from scipy import linalg
+import itertools
+import math
+from itertools import combinations
+from pymatgen.ext.matproj import MPRester
+from pymatgen.analysis.phase_diagram import PhaseDiagram
+import numpy as np
+from math import *
+from scipy.optimize import newton
+from scipy.integrate import trapz
+from scipy.interpolate import interp1d
+from pymatgen.core.periodic_table import Element
+from pymatgen.core.operations import SymmOp
+from pymatgen.vis.structure_vtk import StructureVis
+from pymatgen.vis.structure_vtk import MultiStructuresVis
+from pymatgen.io.cif import CifWriter
+import matplotlib.pyplot as plt
+from collections import Counter
+
+
