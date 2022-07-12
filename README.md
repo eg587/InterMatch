@@ -5,6 +5,8 @@ InterMatch
 
 **Authors:** *Eli Gerber and Steven B. Torrisi*
 
+**DOI:** https://doi.org/10.5281/zenodo.6823973
+
 # Overview
 
 Scripts comprising the InterMatch framework for computing charge transfer, band alignments, elastic energy, strain tensor, moiré superlattices, 
